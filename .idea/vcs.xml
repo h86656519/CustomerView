@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/AsyncTask_test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Equals_test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ExecutorService_example" vcs="Git" />
+  </component>
+</project>
