@@ -10,26 +10,33 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-public class View1 extends View {
+public class LineChartView extends View {
     Paint linePaint = new Paint();
     Paint baselinePaint = new Paint();
     Paint pointPaint = new Paint();
-
+    private final int orginalX =50;
+    private final int orginalY = 500;
     ArrayList<Point> pointList = new ArrayList<Point>();
 
-    public View1(Context context) {
+    public LineChartView(Context context) {
         super(context);
         init();
     }
 
-    public View1(Context context, AttributeSet attrs) {
+    public LineChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public View1(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LineChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
     }
 
     private void init() {
@@ -43,49 +50,49 @@ public class View1 extends View {
         pointList.add(new Point(300, 300));
     }
 
-    public View1(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public LineChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
-    public void setXXX(List<Point> pointList) {
+    public void setPoints(List<Point> pointList) {
+        this.pointList.clear();
+        this.pointList.addAll(pointList);
 
+        invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //Point point = new Point(1,1);
-        //第一個點的x，第一個點的y，線的長度，結束點的y
-//        float[] pts = {50, 100, 150, 50,
-//                150, 50, 250, 150,
-//                350, 120, 250, 150
-//        };
-        float[] baselinepts = {50, 500, 900, 500,
+
+        //baseLinePts
+        float[] baseLinePts = {50, 500, 900, 500,
                 50, 500, 50, 100,
         };
         linePaint.setColor(Color.RED);
+        linePaint.setStrokeWidth(7);
         pointPaint.setColor(Color.BLUE);
         pointPaint.setStrokeWidth(20);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
+
         for (int i = 0; i <= pointList.size() - 1; i++) {
-            canvas.drawPoint(pointList.get(i).x + 50, 500-pointList.get(i).y, pointPaint);
-            canvas.drawLine(pointList.get(i).x + 50, 500-pointList.get(i).y,pointList.get(i + 1).x + 50,500-pointList.get(i + 1).y, pointPaint);
+            canvas.drawPoint(pointList.get(i).x + orginalX, orginalY - pointList.get(i).y, pointPaint);
         }
 
-//        canvas.drawPoint(50, 100, pointPaint);
-//        canvas.drawPoint(150, 50, pointPaint);
-//        canvas.drawPoint(250, 150, pointPaint);
-//        canvas.drawPoint(350, 120, pointPaint);
+        for (int i = 0; i <= pointList.size() - 2; i++) {
+            canvas.drawLine(pointList.get(i).x + orginalX,
+                    orginalY - pointList.get(i).y,
+                    pointList.get(i + 1).x + orginalX,
+                    orginalY - pointList.get(i + 1).y,
+                    linePaint);
+        }
 
-        canvas.drawPoint(50, 500, pointPaint);
-//        canvas.drawLines(pts, linePaint);
-
+        canvas.drawPoint(orginalX, orginalY, pointPaint);
         baselinePaint.setTextSize(28);
         baselinePaint.setStrokeWidth(10);
-        canvas.drawLines(baselinepts, baselinePaint);
+        canvas.drawLines(baseLinePts, baselinePaint);
         canvas.drawText("0", 20, 520, baselinePaint);
 
-//        canvas.drawCircle(300, 300, 200, linePaint);
     }
 }
