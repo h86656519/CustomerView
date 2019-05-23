@@ -14,8 +14,11 @@ public class LineChartView extends View {
     Paint linePaint = new Paint();
     Paint baselinePaint = new Paint();
     Paint pointPaint = new Paint();
-    private final int orginalX =50;
+    private final int orginalX = 50;
     private final int orginalY = 500;
+    private final int maxWidth = 550;
+    private final int maxHeight = 550;
+
     ArrayList<Point> pointList = new ArrayList<Point>();
 
     public LineChartView(Context context) {
@@ -35,8 +38,39 @@ public class LineChartView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = getMySize(1000 + getPaddingLeft() + getPaddingRight(), widthMeasureSpec);
+        int height = getMySize(1000 + getPaddingTop() + getPaddingBottom(), heightMeasureSpec);
 
+        if (width < height) {
+            height = width;
+        } else {
+            width = height;
+        }
+
+        setMeasuredDimension(width, height);
+    }
+
+    private int getMySize(int defaultSize, int measureSpec) {
+        int mySize = defaultSize;
+        int mode = MeasureSpec.getMode(measureSpec);
+        int size = MeasureSpec.getSize(measureSpec);
+
+        switch (mode) {
+            case MeasureSpec.UNSPECIFIED: {//如果没有指定大小，就设置为默认大小
+                mySize = defaultSize;
+                break;
+            }
+            case MeasureSpec.AT_MOST: {//如果测量模式是最大取值为size
+                //我们将大小取最大值,你也可以取其他值
+                mySize = defaultSize;
+                break;
+            }
+            case MeasureSpec.EXACTLY: {//如果是固定的大小，那就不要去改变它
+                mySize = size;
+                break;
+            }
+        }
+        return mySize;
     }
 
     private void init() {
@@ -67,8 +101,10 @@ public class LineChartView extends View {
         super.onDraw(canvas);
 
         //baseLinePts
-        float[] baseLinePts = {50, 500, 900, 500,
-                50, 500, 50, 100,
+        float[] baseLinePts = {
+//                horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY,
+                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), maxHeight + getPaddingTop(),
+                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), maxHeight + getPaddingTop(),
         };
         linePaint.setColor(Color.RED);
         linePaint.setStrokeWidth(7);
