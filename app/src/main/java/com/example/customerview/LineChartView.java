@@ -38,8 +38,8 @@ public class LineChartView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = getMySize(1000 + getPaddingLeft() + getPaddingRight(), widthMeasureSpec);
-        int height = getMySize(1000 + getPaddingTop() + getPaddingBottom(), heightMeasureSpec);
+        int width = getMySize(maxWidth + getPaddingLeft() + getPaddingRight(), widthMeasureSpec);
+        int height = getMySize(maxHeight + getPaddingTop() + getPaddingBottom(), heightMeasureSpec);
 
         if (width < height) {
             height = width;
@@ -93,7 +93,7 @@ public class LineChartView extends View {
         this.pointList.clear();
         this.pointList.addAll(pointList);
 
-        invalidate();
+        invalidate(); //更新view
     }
 
     @Override
@@ -103,8 +103,8 @@ public class LineChartView extends View {
         //baseLinePts
         float[] baseLinePts = {
 //                horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY,
-                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), maxHeight + getPaddingTop(),
-                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), maxHeight + getPaddingTop(),
+                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), 50 + getPaddingTop(),
+                50 + getPaddingLeft(), maxHeight + getPaddingTop(), maxHeight, maxHeight + getPaddingTop(),
         };
         linePaint.setColor(Color.RED);
         linePaint.setStrokeWidth(7);
