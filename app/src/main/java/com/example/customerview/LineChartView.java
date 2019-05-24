@@ -14,11 +14,12 @@ public class LineChartView extends View {
     Paint linePaint = new Paint();
     Paint baselinePaint = new Paint();
     Paint pointPaint = new Paint();
+    Paint textPaint = new Paint();
     private final int orginalX = 50;
-    private final int orginalY = 500;
+    private final int orginalY = 550;
     private final int maxWidth = 550;
     private final int maxHeight = 550;
-
+    private int scale = 0;
     ArrayList<Point> pointList = new ArrayList<Point>();
 
     public LineChartView(Context context) {
@@ -89,6 +90,11 @@ public class LineChartView extends View {
         init();
     }
 
+    public void setScale(int scale) {
+        this.scale = scale;
+        invalidate();
+    }
+
     public void setPoints(List<Point> pointList) {
         this.pointList.clear();
         this.pointList.addAll(pointList);
@@ -99,12 +105,11 @@ public class LineChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         //baseLinePts
         float[] baseLinePts = {
-//                horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY,
-                50 + getPaddingLeft(), maxHeight + getPaddingTop(), 50 + getPaddingLeft(), 50 + getPaddingTop(),
-                50 + getPaddingLeft(), maxHeight + getPaddingTop(), maxHeight, maxHeight + getPaddingTop(),
+                orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
+//              horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY,
+                orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop(), //
         };
         linePaint.setColor(Color.RED);
         linePaint.setStrokeWidth(7);
@@ -113,22 +118,26 @@ public class LineChartView extends View {
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
 
         for (int i = 0; i <= pointList.size() - 1; i++) {
-            canvas.drawPoint(pointList.get(i).x + orginalX, orginalY - pointList.get(i).y, pointPaint);
+//            canvas.drawPoint(pointList.get(i).x + orginalX, orginalY - pointList.get(i).y, pointPaint);
+            canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(), orginalY - pointList.get(i).y + getPaddingTop(), pointPaint);
         }
 
         for (int i = 0; i <= pointList.size() - 2; i++) {
-            canvas.drawLine(pointList.get(i).x + orginalX,
-                    orginalY - pointList.get(i).y,
-                    pointList.get(i + 1).x + orginalX,
-                    orginalY - pointList.get(i + 1).y,
+            canvas.drawLine(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(),
+                    orginalY - pointList.get(i).y + getPaddingTop(),
+                    pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft(),
+                    orginalY - pointList.get(i + 1).y + getPaddingTop(),
                     linePaint);
         }
 
         canvas.drawPoint(orginalX, orginalY, pointPaint);
-        baselinePaint.setTextSize(28);
+        //pixel
+        textPaint.setTextSize(28);
+        textPaint.setTextAlign(Paint.Align.CENTER);
         baselinePaint.setStrokeWidth(10);
         canvas.drawLines(baseLinePts, baselinePaint);
-        canvas.drawText("0", 20, 520, baselinePaint);
+        canvas.drawText("0", orginalX + getPaddingLeft() - 20, orginalY + getPaddingTop(), textPaint);
+        canvas.drawText(String.valueOf(scale / 10), orginalX + getPaddingLeft() - 20, orginalY - 50 + getPaddingTop(), textPaint);
 
     }
 }
