@@ -22,6 +22,7 @@ public class LineChartView extends View {
     private int scale = 0;
     ArrayList<Point> pointList = new ArrayList<Point>();
 
+
     public LineChartView(Context context) {
         super(context);
         init();
@@ -98,13 +99,13 @@ public class LineChartView extends View {
     public void setPoints(List<Point> pointList) {
         this.pointList.clear();
         this.pointList.addAll(pointList);
-
         invalidate(); //更新view
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        int px = 550;
         //baseLinePts
         float[] baseLinePts = {
                 orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
@@ -130,14 +131,17 @@ public class LineChartView extends View {
                     linePaint);
         }
 
-        canvas.drawPoint(orginalX, orginalY, pointPaint);
+      
         //pixel
         textPaint.setTextSize(28);
         textPaint.setTextAlign(Paint.Align.CENTER);
         baselinePaint.setStrokeWidth(10);
         canvas.drawLines(baseLinePts, baselinePaint);
         canvas.drawText("0", orginalX + getPaddingLeft() - 20, orginalY + getPaddingTop(), textPaint);
-        canvas.drawText(String.valueOf(scale / 10), orginalX + getPaddingLeft() - 20, orginalY - 50 + getPaddingTop(), textPaint);
+        if (scale <= 10) {
+            px = px - scale * 50;
+        }
+        canvas.drawText(String.valueOf(px), orginalX + getPaddingLeft() - 10,  getPaddingTop(), textPaint);
 
     }
 }

@@ -1,5 +1,6 @@
 package com.example.customerview;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     EditText x_ed, y_ed;
     int x, y = 0;
     private LineChartView chartView;
+    float scale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
                 // 10 - 20 -> 200
                 // ......
                 // 90-100 -> 1000
-                int scale = progress/10;
+                int scale = progress / 10;
+//                chartView.setScale(px2dip(scale));
                 chartView.setScale(scale);
             }
 
@@ -61,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void generateNewPoints() {
         List<Point> pointList = new ArrayList<>();
         pointList.add(new Point(60, 10));
@@ -73,4 +75,10 @@ public class MainActivity extends AppCompatActivity {
         }
         chartView.setPoints(pointList);
     }
+
+    public int px2dip(float pxValue) {
+        scale = this.getResources().getDisplayMetrics().density;
+        return (int) (pxValue / scale + 0.5f);
+    }
+
 }
