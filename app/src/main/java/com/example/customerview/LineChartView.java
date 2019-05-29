@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class LineChartView extends View {
     private final int maxHeight = 550;
     private final int textPadding = 30;
     private int scale = 0; //縮放比例
-    ArrayList<Point> pointList = new ArrayList<Point>();
+    private ArrayList<Point> pointList = new ArrayList<Point>();
 
     public LineChartView(Context context) {
         super(context);
@@ -56,8 +55,8 @@ public class LineChartView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = getMySize(maxWidth + getPaddingLeft() + getPaddingRight(), widthMeasureSpec);
-        int height = getMySize(maxHeight + getPaddingTop() + getPaddingBottom(), heightMeasureSpec);
+        int width = getLineChartView(maxWidth + getPaddingLeft() + getPaddingRight(), widthMeasureSpec);
+        int height = getLineChartView(maxHeight + getPaddingTop() + getPaddingBottom(), heightMeasureSpec);
 //正方形
 //        if (width < height) {
 //            height = width;
@@ -68,7 +67,7 @@ public class LineChartView extends View {
         setMeasuredDimension(width, height);
     }
 
-    private int getMySize(int defaultSize, int measureSpec) {
+    private int getLineChartView(int defaultSize, int measureSpec) {
         int mySize = defaultSize;
         int mode = MeasureSpec.getMode(measureSpec);
         int size = MeasureSpec.getSize(measureSpec);
@@ -145,7 +144,7 @@ public class LineChartView extends View {
                 orginalX + getPaddingLeft() + 150 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scale + 1), maxHeight + getPaddingTop() + 10,
                 orginalX + getPaddingLeft() + 200 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scale + 1), maxHeight + getPaddingTop() + 10,
         };
-        Log.i("123", "LatticePaintPts[0] : " + LatticePaintPts[0]);
+//        Log.i("123", "LatticePaintPts[0] : " + LatticePaintPts[0]);
 
         canvas.drawLines(LatticePaintPts, LatticePaint);
 
