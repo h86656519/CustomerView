@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="30dp"
-        app:chart_textSize="5dp"
+        app:chart_textSize="12sp"
         app:lineColor="@color/colorPrimary" />
 
     <Button

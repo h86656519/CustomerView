@@ -92,7 +92,7 @@ public class LineChartView extends View {
     }
 
     private void init() {
-        textSize = convertDpTodefultMaxX(ChartTextSize);
+        textSize = ChartTextSize;
         textPaint.setTextSize(textSize);
         textPaint.setTextAlign(Paint.Align.CENTER);
         baselinePaint.setStrokeWidth(10);
@@ -102,7 +102,7 @@ public class LineChartView extends View {
         pointPaint.setStrokeWidth(20);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
         gridPaint.setColor(Color.GRAY);
-        gridPaint.setStrokeWidth(7);
+        gridPaint.setStrokeWidth(3);
 
         pointList.add(new Point(50, 50));
         pointList.add(new Point(100, 190));
@@ -140,7 +140,12 @@ public class LineChartView extends View {
         //x軸的長度/10 = 需要有多少條直線,分10等分
 
         int xLineCount = defultMaxX / 50;
-        for (int i = 1; i <= xLineCount; i++) {
+        for (int i = 1; i < xLineCount; i++) {
+            int drawGridX = orginalX + getPaddingLeft() + 50 * (scale + 1) * i;
+            //當畫的線超過x 軸的最大值時，就不畫
+            if (drawGridX > defultMaxX) {
+                break;
+            }
             canvas.drawLine(orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
                     getPaddingTop() + 10,
                     orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
@@ -192,7 +197,7 @@ public class LineChartView extends View {
     }
 
     public int convertDpTodefultMaxX(int dpValue) {
-        float scale = this.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale);
+        float density = this.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * density);
     }
 }
