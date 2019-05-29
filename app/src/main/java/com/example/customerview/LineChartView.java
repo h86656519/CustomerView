@@ -16,7 +16,7 @@ public class LineChartView extends View {
     Paint baselinePaint = new Paint();
     Paint pointPaint = new Paint();
     Paint textPaint = new Paint();
-    Paint LatticePaint = new Paint();
+    Paint gridPaint = new Paint();
     private final int orginalX = 50;
     private final int orginalY = 550;
     private int textSize = 50;
@@ -27,6 +27,7 @@ public class LineChartView extends View {
     private final int textPadding = 30;
     private int scale = 0; //縮放比例
     private ArrayList<Point> pointList = new ArrayList<Point>();
+    private int defultMaxX = 600;
 
     public LineChartView(Context context) {
         super(context);
@@ -100,8 +101,8 @@ public class LineChartView extends View {
         pointPaint.setColor(Color.BLUE);
         pointPaint.setStrokeWidth(20);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
-        LatticePaint.setColor(Color.GRAY);
-        LatticePaint.setStrokeWidth(7);
+        gridPaint.setColor(Color.GRAY);
+        gridPaint.setStrokeWidth(7);
 
         pointList.add(new Point(50, 50));
         pointList.add(new Point(100, 190));
@@ -122,32 +123,56 @@ public class LineChartView extends View {
         invalidate(); //更新view
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        int defultMaxX = 600;
-        //baseLinePts
+    private void drawGrid(Canvas canvas) {
+//        float[] LatticePaintPts = {
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 50 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 50 * (scale + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 100 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 100 * (scale + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 150 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 150 * (scale + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 200 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 200 * (scale + 1), //
+//                orginalX + getPaddingLeft() + 50 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 50 * (scale + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 100 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 100 * (scale + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 150 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scale + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 200 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scale + 1), maxHeight + getPaddingTop() + 10,
+//        };
+//        canvas.drawLines(LatticePaintPts, gridPaint);
+
+        //抓x軸的長度
+        //x軸的長度/10 = 需要有多少條直線,分10等分
+
+        int xLineCount = defultMaxX / 50;
+        for (int i = 1; i <= xLineCount; i++) {
+            canvas.drawLine(orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
+                    getPaddingTop() + 10,
+                    orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
+                    maxHeight + getPaddingTop() + 10,
+                    gridPaint);
+        }
+    }
+
+    private void drawDots(Canvas canvas) {
+        for (int i = 0; i <= pointList.size() - 1; i++) {
+            // orginalX + getPaddingLeft() + 50 * (scale + 1)
+            canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(), orginalY - pointList.get(i).y + getPaddingTop(), pointPaint);
+        }
+    }
+
+    private void drawAxis(Canvas canvas) {
+        int currentMaxX = defultMaxX;
         float[] baseLinePts = {
 //                verticalStartX, verticalStartY, verticalEndX, verticalEndY
                 orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
 //              horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY
                 orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop(), //
         };
+        canvas.drawLines(baseLinePts, baselinePaint);
+        canvas.drawText("0", orginalX + getPaddingLeft() - textPadding, orginalY + getPaddingTop(), textPaint);
+        if (scale <= 10) {
+            currentMaxX = defultMaxX / (scale + 1);
+        }
+        canvas.drawText(String.valueOf(currentMaxX), maxWidth + getPaddingLeft() + textPadding, maxHeight + getPaddingTop(), textPaint);
+    }
 
-        float[] LatticePaintPts = {
-                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 50 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 50 * (scale + 1), //
-                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 100 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 100 * (scale + 1), //
-                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 150 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 150 * (scale + 1), //
-                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 200 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 200 * (scale + 1), //
-                orginalX + getPaddingLeft() + 50 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 50 * (scale + 1), maxHeight + getPaddingTop() + 10,
-                orginalX + getPaddingLeft() + 100 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 100 * (scale + 1), maxHeight + getPaddingTop() + 10,
-                orginalX + getPaddingLeft() + 150 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scale + 1), maxHeight + getPaddingTop() + 10,
-                orginalX + getPaddingLeft() + 200 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scale + 1), maxHeight + getPaddingTop() + 10,
-        };
-//        Log.i("123", "LatticePaintPts[0] : " + LatticePaintPts[0]);
-
-        canvas.drawLines(LatticePaintPts, LatticePaint);
-
+    private void drawLine(Canvas canvas) {
         for (int i = 0; i <= pointList.size() - 2; i++) {
             canvas.drawLine(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(),
                     orginalY - pointList.get(i).y + getPaddingTop(),
@@ -155,23 +180,15 @@ public class LineChartView extends View {
                     orginalY - pointList.get(i + 1).y + getPaddingTop(),
                     linePaint);
         }
+    }
 
-        for (int i = 0; i <= pointList.size() - 1; i++) {
-//            canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX, orginalY - pointList.get(i).y, pointPaint);
-            // orginalX + getPaddingLeft() + 50 * (scale + 1)
-            canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(), orginalY - pointList.get(i).y + getPaddingTop(), pointPaint);
-//            Log.i("123", "point " + i + " - " + (pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft()));
-//            Log.i("123", "x " + i + " - " + pointList.get(i).x);
-        }
-
-        canvas.drawLines(baseLinePts, baselinePaint);
-        if (scale <= 10) {
-            defultMaxX = defultMaxX - (scale - 1) * 60;
-        }
-
-        canvas.drawText("0", orginalX + getPaddingLeft() - textPadding, orginalY + getPaddingTop(), textPaint);
-        canvas.drawText(String.valueOf(defultMaxX), maxWidth + getPaddingLeft() + textPadding, maxHeight + getPaddingTop(), textPaint);
-
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        drawAxis(canvas);
+        drawGrid(canvas);
+        drawLine(canvas);
+        drawDots(canvas);
     }
 
     public int convertDpTodefultMaxX(int dpValue) {

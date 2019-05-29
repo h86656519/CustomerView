@@ -57,18 +57,18 @@ public class BarGraphView extends View {
         }
         return mySize;
     }
-    private void init() {
-        textSize = convertDpTodefultMaxX(ChartTextSize);
-        textPaint.setTextSize(textSize);
-        textPaint.setTextAlign(Paint.Align.CENTER);
-        baselinePaint.setStrokeWidth(10);
-        linePaint.setColor(lineColor);
-        linePaint.setStrokeWidth(7);
-        pointPaint.setColor(Color.BLUE);
-        pointPaint.setStrokeWidth(20);
-        pointPaint.setStrokeCap(Paint.Cap.ROUND);
-        LatticePaint.setColor(Color.GRAY);
-        LatticePaint.setStrokeWidth(7);
-
-    }
+//    private void init() {
+//        textSize = convertDpTodefultMaxX(ChartTextSize);
+//        textPaint.setTextSize(textSize);
+//        textPaint.setTextAlign(Paint.Align.CENTER);
+//        baselinePaint.setStrokeWidth(10);
+//        linePaint.setColor(lineColor);
+//        linePaint.setStrokeWidth(7);
+//        pointPaint.setColor(Color.BLUE);
+//        pointPaint.setStrokeWidth(20);
+//        pointPaint.setStrokeCap(Paint.Cap.ROUND);
+//        gridPaint.setColor(Color.GRAY);
+//        gridPaint.setStrokeWidth(7);
+//
+//    }
 }
