@@ -9,29 +9,32 @@
 
     <com.example.customerview.LineChartView
         android:id="@+id/chartView"
-
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        app:chart_textSize="5dp"
+        app:lineColor="@color/colorPrimary" />
 
     <Button
         android:id="@+id/button"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="new data" />
 
     <EditText
         android:id="@+id/inputX"
-        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="X 軸" />
+        android:hint="X 軸"
+        android:inputType="number" />
 
     <EditText
         android:id="@+id/inputY"
-        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Y 軸" />
+        android:hint="Y 軸"
+        android:inputType="number" />
 
     <SeekBar
         android:id="@+id/seekScale"

@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <declare-styleable name="MyView">
+        <attr name="chart_textSize" format="dimension" />
+        <attr name="lineColor" format="color" />
+    </declare-styleable>
+
 </resources>
