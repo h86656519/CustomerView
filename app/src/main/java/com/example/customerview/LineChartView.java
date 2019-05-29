@@ -26,7 +26,7 @@ public class LineChartView extends View {
     private final int maxWidth = 600;
     private final int maxHeight = 550;
     private final int textPadding = 30;
-    private int scale = 0;
+    private int scale = 0; //縮放比例
     ArrayList<Point> pointList = new ArrayList<Point>();
 
     public LineChartView(Context context) {
@@ -129,8 +129,9 @@ public class LineChartView extends View {
         int defultMaxX = 600;
         //baseLinePts
         float[] baseLinePts = {
+//                verticalStartX, verticalStartY, verticalEndX, verticalEndY
                 orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
-//              horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY,
+//              horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY
                 orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop(), //
         };
 
@@ -144,7 +145,7 @@ public class LineChartView extends View {
                 orginalX + getPaddingLeft() + 150 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scale + 1), maxHeight + getPaddingTop() + 10,
                 orginalX + getPaddingLeft() + 200 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scale + 1), maxHeight + getPaddingTop() + 10,
         };
-//        Log.i("123", "LatticePaintPts[0] : " + LatticePaintPts[0]);
+        Log.i("123", "LatticePaintPts[0] : " + LatticePaintPts[0]);
 
         canvas.drawLines(LatticePaintPts, LatticePaint);
 
