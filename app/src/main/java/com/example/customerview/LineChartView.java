@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class LineChartView extends View {
     private int scale = 0; //縮放比例
     private ArrayList<Point> pointList = new ArrayList<Point>();
     private int defultMaxX = 600;
+    private int defultMaxY = 600;
 
     public LineChartView(Context context) {
         super(context);
@@ -142,8 +144,8 @@ public class LineChartView extends View {
         int xLineCount = defultMaxX / 50;
         for (int i = 1; i < xLineCount; i++) {
             int drawGridX = orginalX + getPaddingLeft() + 50 * (scale + 1) * i;
-            //當畫的線超過x 軸的最大值時，就不畫
-            if (drawGridX > defultMaxX) {
+            //作法邏輯:當畫的線超過x軸的最大值時，就不畫背景的網線
+            if (drawGridX > defultMaxX + getPaddingLeft()) {
                 break;
             }
             canvas.drawLine(orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
@@ -152,15 +154,21 @@ public class LineChartView extends View {
                     maxHeight + getPaddingTop() + 10,
                     gridPaint);
         }
+
     }
 
     private void drawDots(Canvas canvas) {
         for (int i = 0; i <= pointList.size() - 1; i++) {
-            // orginalX + getPaddingLeft() + 50 * (scale + 1)
+            //作法邏輯:當畫的線超過x軸的最大值時，就不畫點
+            int drawDotsX = pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft();
+            if (drawDotsX > defultMaxX + getPaddingLeft()) {
+                break;
+            }
             canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(), orginalY - pointList.get(i).y + getPaddingTop(), pointPaint);
         }
     }
 
+    //畫軸
     private void drawAxis(Canvas canvas) {
         int currentMaxX = defultMaxX;
         float[] baseLinePts = {
@@ -177,13 +185,34 @@ public class LineChartView extends View {
         canvas.drawText(String.valueOf(currentMaxX), maxWidth + getPaddingLeft() + textPadding, maxHeight + getPaddingTop(), textPaint);
     }
 
+    //畫折線
     private void drawLine(Canvas canvas) {
+        canvas.drawPoint(defultMaxX + getPaddingLeft(), 300, pointPaint); //點
         for (int i = 0; i <= pointList.size() - 2; i++) {
-            canvas.drawLine(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(),
-                    orginalY - pointList.get(i).y + getPaddingTop(),
-                    pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft(),
-                    orginalY - pointList.get(i + 1).y + getPaddingTop(),
-                    linePaint);
+            int startX = pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft();
+            int stopX = pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft();
+            int startY = orginalY - pointList.get(i).y + getPaddingTop();
+            int stopY = orginalY - pointList.get(i + 1).y + getPaddingTop();
+
+            if (stopX > defultMaxX + getPaddingLeft()) {
+                stopX = 600 + getPaddingLeft();
+                Log.i("132", " if pointList.get(i) : " + pointList.get(i));
+            } else {
+                stopX = pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft();
+                Log.i("132", "else pointList.get(i) : " + pointList.get(i));
+            }
+
+            //50
+            if (startX > defultMaxX + getPaddingLeft()) {
+                return;
+            }
+            if (startY > defultMaxX + getPaddingLeft()) {
+                stopY = xxxx
+            }
+
+            canvas.drawLine(startX, startY, stopX, stopY, linePaint);
+            Log.i("132", "stopX : " + stopX);
+
         }
     }
 

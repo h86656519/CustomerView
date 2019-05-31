@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        Button button = new Button(this);
-//        button.setText();
     }
 
 
@@ -74,11 +72,6 @@ public class MainActivity extends AppCompatActivity {
             pointList.add(new Point(x, y));
         }
         chartView.setPoints(pointList);
-    }
-
-    public int px2dip(float pxValue) {
-        scale = this.getResources().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
     }
 
 }
