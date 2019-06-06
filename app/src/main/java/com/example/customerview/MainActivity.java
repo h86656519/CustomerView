@@ -1,6 +1,5 @@
 package com.example.customerview;
 
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -34,18 +33,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SeekBar seekScale = findViewById(R.id.seekScale);
-        seekScale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        SeekBar seekScaleX = findViewById(R.id.seekScaleX);
+        seekScaleX.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //progress 0-100
-                // 0-10 -> 100
-                // 10 - 20 -> 200
-                // ......
-                // 90-100 -> 1000
-                int scale = progress / 10;
-//                chartView.setScale(px2dip(scale));
-                chartView.setScale(scale);
+                int scalex = progress / 10;
+//                chartView.setScaleX(px2dip(scale));
+                chartView.setScaleX(scalex);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        SeekBar seekScaleY = findViewById(R.id.seekScaleY);
+        seekScaleY.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int scaley = progress / 10;
+                chartView.setScaleY(scaley);
             }
 
             @Override

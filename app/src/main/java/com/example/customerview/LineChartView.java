@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -26,7 +27,8 @@ public class LineChartView extends View {
     private final int maxWidth = 600;
     private final int maxHeight = 550;
     private final int textPadding = 30;
-    private int scale = 0; //縮放比例
+    private int scaleX = 0; //縮放比例
+    private int scaleY = 0; //縮放比例
     private ArrayList<Point> pointList = new ArrayList<Point>();
     private int defultMaxX = 600;
     private int defultMaxY = 600;
@@ -106,6 +108,11 @@ public class LineChartView extends View {
         gridPaint.setColor(Color.GRAY);
         gridPaint.setStrokeWidth(3);
 
+//        pointList.add(new Point(5, 5));
+//        pointList.add(new Point(10, 70));
+//        pointList.add(new Point(20, 18));
+//        pointList.add(new Point(30, 30));
+
         pointList.add(new Point(50, 50));
         pointList.add(new Point(100, 190));
         pointList.add(new Point(200, 180));
@@ -113,8 +120,13 @@ public class LineChartView extends View {
     }
 
 
-    public void setScale(int scale) {
-        this.scale = scale;
+    public void setScaleX(int scaleX) {
+        this.scaleX = scaleX;
+        invalidate();
+    }
+
+    public void setScaleY(int scaleY) {
+        this.scaleY = scaleY;
         invalidate();
     }
 
@@ -127,31 +139,45 @@ public class LineChartView extends View {
 
     private void drawGrid(Canvas canvas) {
 //        float[] LatticePaintPts = {
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 50 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 50 * (scale + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 100 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 100 * (scale + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 150 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 150 * (scale + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 200 * (scale + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 200 * (scale + 1), //
-//                orginalX + getPaddingLeft() + 50 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 50 * (scale + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 100 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 100 * (scale + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 150 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scale + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 200 * (scale + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scale + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 50 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 50 * (scaleX + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 100 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 100 * (scaleX + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 150 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 150 * (scaleX + 1), //
+//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 200 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 200 * (scaleX + 1), //
+//                orginalX + getPaddingLeft() + 50 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 50 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 100 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 100 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 150 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
+//                orginalX + getPaddingLeft() + 200 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
 //        };
 //        canvas.drawLines(LatticePaintPts, gridPaint);
 
         //抓x軸的長度
         //x軸的長度/10 = 需要有多少條直線,分10等分
-
         int xLineCount = defultMaxX / 50;
         for (int i = 1; i < xLineCount; i++) {
-            int drawGridX = orginalX + getPaddingLeft() + 50 * (scale + 1) * i;
+            int drawGridX = orginalX + getPaddingLeft() + 50 * (scaleX + 1) * i;
             //作法邏輯:當畫的線超過x軸的最大值時，就不畫背景的網線
             if (drawGridX > defultMaxX + getPaddingLeft()) {
                 break;
             }
-            canvas.drawLine(orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
-                    getPaddingTop() + 10,
-                    orginalX + getPaddingLeft() + 50 * (scale + 1) * i,
-                    maxHeight + getPaddingTop() + 10,
+            canvas.drawLine(drawGridX,
+                    getPaddingTop(),
+                    drawGridX,
+                    maxHeight + getPaddingTop(),
+                    gridPaint);
+        }
+
+        //抓y軸的長度
+        int yLineCount = defultMaxY / 50;
+        for (int i = 1; i < yLineCount; i++) {
+            int drawGridy = maxHeight + getPaddingTop() - 50 * (scaleX + 1) * i;
+            //作法邏輯:當畫的線超過y軸的最小值時，就不畫背景的網線
+            if (drawGridy < getPaddingTop()) {
+                break;
+            }
+            canvas.drawLine(orginalX + getPaddingLeft(),
+                    drawGridy,
+                    maxWidth + getPaddingLeft(),
+                    drawGridy,
                     gridPaint);
         }
 
@@ -160,11 +186,21 @@ public class LineChartView extends View {
     private void drawDots(Canvas canvas) {
         for (int i = 0; i <= pointList.size() - 1; i++) {
             //作法邏輯:當畫的線超過x軸的最大值時，就不畫點
-            int drawDotsX = pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft();
+            int drawDotsX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
+            int drawDotsY = orginalY - pointList.get(i).y * (scaleX + 1)+ getPaddingTop();
+            int drawDotsY2 = orginalY - pointList.get(2).y * (scaleX + 1)+ getPaddingTop();
             if (drawDotsX > defultMaxX + getPaddingLeft()) {
                 break;
             }
-            canvas.drawPoint(pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft(), orginalY - pointList.get(i).y + getPaddingTop(), pointPaint);
+            //作法邏輯:當畫的線超過y軸的最小值時，就不畫點
+//            Log.i("132", "getPaddingTop : " + getPaddingTop());
+//            Log.i("132", "drawDotsY2 : " + drawDotsY2);
+//            Log.i("132", "----------------- " );
+            //討論1
+//            if (drawDotsY < getPaddingTop()) {
+//                drawDotsY = getPaddingTop();
+//            }
+            canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
         }
     }
 
@@ -179,39 +215,43 @@ public class LineChartView extends View {
         };
         canvas.drawLines(baseLinePts, baselinePaint);
         canvas.drawText("0", orginalX + getPaddingLeft() - textPadding, orginalY + getPaddingTop(), textPaint);
-        if (scale <= 10) {
-            currentMaxX = defultMaxX / (scale + 1);
+        if (scaleX <= 10) {
+            currentMaxX = defultMaxX / (scaleX + 1);
         }
         canvas.drawText(String.valueOf(currentMaxX), maxWidth + getPaddingLeft() + textPadding, maxHeight + getPaddingTop(), textPaint);
     }
 
     //畫折線
     private void drawLine(Canvas canvas) {
-        canvas.drawPoint(defultMaxX + getPaddingLeft(), 300, pointPaint); //點
+        canvas.drawPoint(defultMaxX + getPaddingLeft(), 300, pointPaint); //點 可刪
         for (int i = 0; i <= pointList.size() - 2; i++) {
-            int startX = pointList.get(i).x * (scale + 1) + orginalX + getPaddingLeft();
-            int stopX = pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft();
-            int startY = orginalY - pointList.get(i).y + getPaddingTop();
-            int stopY = orginalY - pointList.get(i + 1).y + getPaddingTop();
+            int startX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
+            int stopX = pointList.get(i + 1).x * (scaleX + 1) + orginalX + getPaddingLeft();
+            int startY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
+            int stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1) + getPaddingTop();
 
             if (stopX > defultMaxX + getPaddingLeft()) {
                 stopX = 600 + getPaddingLeft();
-                Log.i("132", " if pointList.get(i) : " + pointList.get(i));
+//                Log.i("132", " if pointList.get(i) : " + pointList.get(i));
             } else {
-                stopX = pointList.get(i + 1).x * (scale + 1) + orginalX + getPaddingLeft();
-                Log.i("132", "else pointList.get(i) : " + pointList.get(i));
+                stopX = pointList.get(i + 1).x * (scaleX + 1) + orginalX + getPaddingLeft();
+//                Log.i("132", "else pointList.get(i) : " + pointList.get(i));
             }
-
-            //50
             if (startX > defultMaxX + getPaddingLeft()) {
                 return;
             }
-            if (startY > defultMaxX + getPaddingLeft()) {
-                stopY = xxxx
+
+            if (stopY <  getPaddingTop()) {
+                stopY = getPaddingTop();
+            } else {
+                stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1)+ getPaddingTop();
             }
+//討論2
+//            if (startY <  getPaddingTop()) {
+//                return;
+//            }
 
             canvas.drawLine(startX, startY, stopX, stopY, linePaint);
-            Log.i("132", "stopX : " + stopX);
 
         }
     }
@@ -228,5 +268,27 @@ public class LineChartView extends View {
     public int convertDpTodefultMaxX(int dpValue) {
         float density = this.getResources().getDisplayMetrics().density;
         return (int) (dpValue * density);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction() & MotionEvent.ACTION_MASK;
+        //Log.d("CV", "Action ["+action+"]");
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                Log.i("132", "ACTION_DOWN : ");
+                Log.i("132", "ACTION_DOWN : " + event.getX() + event.getY());
+
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                Log.i("132", "ACTION_MOVE : ");
+                break;
+            }
+
+        }
+
+        invalidate();
+        return true;
     }
 }

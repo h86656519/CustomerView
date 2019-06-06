@@ -37,7 +37,13 @@
         android:inputType="number" />
 
     <SeekBar
-        android:id="@+id/seekScale"
+        android:id="@+id/seekScaleX"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <SeekBar
+        android:layout_marginTop="20dp"
+        android:id="@+id/seekScaleY"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
