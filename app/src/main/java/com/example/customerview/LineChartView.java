@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,9 @@ public class LineChartView extends View {
     private ArrayList<Point> pointList = new ArrayList<Point>();
     private int defultMaxX = 600;
     private int defultMaxY = 600;
+    private int highlightPoint = -1; //-1 表示無用的值
+    //int float boolean -> primitive
+    //Integer Float Boolean -> object(non-primitive)
 
     public LineChartView(Context context) {
         super(context);
@@ -102,6 +106,7 @@ public class LineChartView extends View {
         baselinePaint.setStrokeWidth(10);
         linePaint.setColor(lineColor);
         linePaint.setStrokeWidth(7);
+        Log.i("132", "pointPaint.getColor  1  :   "  + pointPaint.getColor());
         pointPaint.setColor(Color.BLUE);
         pointPaint.setStrokeWidth(20);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -138,18 +143,6 @@ public class LineChartView extends View {
     }
 
     private void drawGrid(Canvas canvas) {
-//        float[] LatticePaintPts = {
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 50 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 50 * (scaleX + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 100 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 100 * (scaleX + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 150 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 150 * (scaleX + 1), //
-//                orginalX + getPaddingLeft() + 10, maxHeight + getPaddingTop() - 200 * (scaleX + 1), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop() - 200 * (scaleX + 1), //
-//                orginalX + getPaddingLeft() + 50 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 50 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 100 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 100 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 150 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 150 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
-//                orginalX + getPaddingLeft() + 200 * (scaleX + 1), getPaddingTop() + 10, orginalX + getPaddingLeft() + 200 * (scaleX + 1), maxHeight + getPaddingTop() + 10,
-//        };
-//        canvas.drawLines(LatticePaintPts, gridPaint);
-
         //抓x軸的長度
         //x軸的長度/10 = 需要有多少條直線,分10等分
         int xLineCount = defultMaxX / 50;
@@ -185,10 +178,11 @@ public class LineChartView extends View {
 
     private void drawDots(Canvas canvas) {
         for (int i = 0; i <= pointList.size() - 1; i++) {
+//            pointPaint.setColor(Color.BLUE);
             //作法邏輯:當畫的線超過x軸的最大值時，就不畫點
             int drawDotsX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
-            int drawDotsY = orginalY - pointList.get(i).y * (scaleX + 1)+ getPaddingTop();
-            int drawDotsY2 = orginalY - pointList.get(2).y * (scaleX + 1)+ getPaddingTop();
+            int drawDotsY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
+            int drawDotsY2 = orginalY - pointList.get(2).y * (scaleX + 1) + getPaddingTop();
             if (drawDotsX > defultMaxX + getPaddingLeft()) {
                 break;
             }
@@ -196,10 +190,22 @@ public class LineChartView extends View {
 //            Log.i("132", "getPaddingTop : " + getPaddingTop());
 //            Log.i("132", "drawDotsY2 : " + drawDotsY2);
 //            Log.i("132", "----------------- " );
-            //討論1
-//            if (drawDotsY < getPaddingTop()) {
-//                drawDotsY = getPaddingTop();
-//            }
+            if (drawDotsY < getPaddingTop()) {
+                continue;
+            }
+//判斷顏色???
+            if (i == highlightPoint) {
+                Log.i("132", "pointPaint.getColor()"  + pointPaint.getColor());
+                Log.i("132", "Color.BLUE"  + Color.BLUE);
+                if (pointPaint.getColor() == Color.BLUE) {
+                    pointPaint.setColor(Color.RED);
+                } else {
+                    pointPaint.setColor(Color.BLUE);
+                }
+            } else {
+                pointPaint.setColor(Color.BLUE);
+            }
+
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
         }
     }
@@ -241,10 +247,10 @@ public class LineChartView extends View {
                 return;
             }
 
-            if (stopY <  getPaddingTop()) {
+            if (stopY < getPaddingTop()) {
                 stopY = getPaddingTop();
             } else {
-                stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1)+ getPaddingTop();
+                stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1) + getPaddingTop();
             }
 //討論2
 //            if (startY <  getPaddingTop()) {
@@ -276,13 +282,23 @@ public class LineChartView extends View {
         //Log.d("CV", "Action ["+action+"]");
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                Log.i("132", "ACTION_DOWN : ");
-                Log.i("132", "ACTION_DOWN : " + event.getX() + event.getY());
-
+                //用迴圈取得點擊時第N個點
+                for (int i = 0; i < pointList.size(); i++) {
+                    int pointX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
+                    int pointY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
+                    int range = 30; // 點擊的範圍
+                    //取得點擊的i
+                    //i = highlightPoint
+                    //當 highlightPoint = i 時，將point 變成紅色
+                    if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
+                        Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
+                        highlightPoint = i;
+                    }
+                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                Log.i("132", "ACTION_MOVE : ");
+
                 break;
             }
 
