@@ -38,7 +38,7 @@ public class LineChartView extends View {
     private int defultMaxY = 600;
     private int highlightPoint = -1; //-1 表示無用的值
     private int animatingPoint = -1;
-    int highlightStrikeWidth = 20 ;
+    int highlightStrikeWidth = 20;
 
     public LineChartView(Context context) {
         super(context);
@@ -192,16 +192,19 @@ public class LineChartView extends View {
                 continue;
             }
 
-            if(i == animatingPoint) {
-                pointPaint.setStrokeWidth(highlightStrikeWidth);
+            if (i == animatingPoint) {
+
             } else {
-                pointPaint.setStrokeWidth(20);
+
             }
 
             if (i == highlightPoint) {
                 pointPaint.setColor(Color.RED);
+                pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
                 pointPaint.setColor(Color.BLUE);
+                pointPaint.setStrokeWidth(20);
+
             }
 
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
@@ -293,7 +296,7 @@ public class LineChartView extends View {
                     if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
                         Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
                         // i == touch point index
-//                        handleHighlightPoint(i);
+                        handleHighlightPoint(i);
                         doAnimation(i);
                     }
 
@@ -312,10 +315,7 @@ public class LineChartView extends View {
     }
 
     private void handleHighlightPoint(int touchPoint) {
-        if (highlightPoint == touchPoint) {
-            highlightPoint = -1;
-
-        } else {
+        if (highlightPoint != touchPoint) {
             highlightPoint = touchPoint;
 
         }
@@ -324,6 +324,7 @@ public class LineChartView extends View {
     private void doAnimation(final int point) {
         ValueAnimator animator = ValueAnimator.ofInt(20, 30);
         animator.setDuration(60);
+        final boolean aaa = highlightPoint == point;
 
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -337,12 +338,15 @@ public class LineChartView extends View {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                animatingPoint = point;
+                Log.i("132", "aaa : " + aaa);
+                if (!aaa) {
+                    highlightPoint = -1;
+                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                animatingPoint = -1;
+                // animatingPoint = -1;
             }
         });
 
