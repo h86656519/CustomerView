@@ -1,5 +1,7 @@
 package com.example.customerview;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -35,6 +37,7 @@ public class LineChartView extends View {
     private int defultMaxX = 600;
     private int defultMaxY = 600;
     private int highlightPoint = -1; //-1 表示無用的值
+    private int animatingPoint = -1;
     int highlightStrikeWidth = 20 ;
 
     public LineChartView(Context context) {
@@ -189,13 +192,16 @@ public class LineChartView extends View {
                 continue;
             }
 
-            if (i == highlightPoint) {
-                pointPaint.setColor(Color.RED);
+            if(i == animatingPoint) {
                 pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
-                pointPaint.setColor(Color.BLUE);
                 pointPaint.setStrokeWidth(20);
+            }
 
+            if (i == highlightPoint) {
+                pointPaint.setColor(Color.RED);
+            } else {
+                pointPaint.setColor(Color.BLUE);
             }
 
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
@@ -287,12 +293,15 @@ public class LineChartView extends View {
                     if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
                         Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
                         // i == touch point index
-                        handleHighlightPoint(i);
-                        doAnimation();
+//                        handleHighlightPoint(i);
+                        doAnimation(i);
                     }
 
                 }
                 break;
+            }
+            case MotionEvent.ACTION_UP: {
+
             }
             case MotionEvent.ACTION_MOVE: {
                 break;
@@ -312,7 +321,7 @@ public class LineChartView extends View {
         }
     }
 
-    private void doAnimation() {
+    private void doAnimation(final int point) {
         ValueAnimator animator = ValueAnimator.ofInt(20, 30);
         animator.setDuration(60);
 
@@ -322,6 +331,18 @@ public class LineChartView extends View {
                 highlightStrikeWidth = (int) animation.getAnimatedValue();
 //                Log.i("132", "highlightStrikeWidth : " + highlightStrikeWidth);
                 invalidate(); // onDraw
+            }
+        });
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                animatingPoint = point;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                animatingPoint = -1;
             }
         });
 
