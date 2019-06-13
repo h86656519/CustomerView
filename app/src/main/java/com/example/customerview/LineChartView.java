@@ -1,5 +1,6 @@
 package com.example.customerview;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -34,8 +35,7 @@ public class LineChartView extends View {
     private int defultMaxX = 600;
     private int defultMaxY = 600;
     private int highlightPoint = -1; //-1 表示無用的值
-    //int float boolean -> primitive
-    //Integer Float Boolean -> object(non-primitive)
+    int highlightStrikeWidth = 20 ;
 
     public LineChartView(Context context) {
         super(context);
@@ -106,7 +106,7 @@ public class LineChartView extends View {
         baselinePaint.setStrokeWidth(10);
         linePaint.setColor(lineColor);
         linePaint.setStrokeWidth(7);
-        Log.i("132", "pointPaint.getColor  1  :   "  + pointPaint.getColor());
+        Log.i("132", "pointPaint.getColor  1  :   " + pointPaint.getColor());
         pointPaint.setColor(Color.BLUE);
         pointPaint.setStrokeWidth(20);
         pointPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -162,7 +162,7 @@ public class LineChartView extends View {
         //抓y軸的長度
         int yLineCount = defultMaxY / 50;
         for (int i = 1; i < yLineCount; i++) {
-            int drawGridy = maxHeight + getPaddingTop() - 50 * (scaleX + 1) * i;
+            int drawGridy = maxHeight + getPaddingTop() - 50 * (scaleY + 1) * i;
             //作法邏輯:當畫的線超過y軸的最小值時，就不畫背景的網線
             if (drawGridy < getPaddingTop()) {
                 break;
@@ -178,32 +178,24 @@ public class LineChartView extends View {
 
     private void drawDots(Canvas canvas) {
         for (int i = 0; i <= pointList.size() - 1; i++) {
-//            pointPaint.setColor(Color.BLUE);
             //作法邏輯:當畫的線超過x軸的最大值時，就不畫點
             int drawDotsX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
-            int drawDotsY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
-            int drawDotsY2 = orginalY - pointList.get(2).y * (scaleX + 1) + getPaddingTop();
+            int drawDotsY = orginalY - pointList.get(i).y * (scaleY + 1) + getPaddingTop();
             if (drawDotsX > defultMaxX + getPaddingLeft()) {
                 break;
             }
             //作法邏輯:當畫的線超過y軸的最小值時，就不畫點
-//            Log.i("132", "getPaddingTop : " + getPaddingTop());
-//            Log.i("132", "drawDotsY2 : " + drawDotsY2);
-//            Log.i("132", "----------------- " );
             if (drawDotsY < getPaddingTop()) {
                 continue;
             }
-//判斷顏色???
+
             if (i == highlightPoint) {
-                Log.i("132", "pointPaint.getColor()"  + pointPaint.getColor());
-                Log.i("132", "Color.BLUE"  + Color.BLUE);
-                if (pointPaint.getColor() == Color.BLUE) {
-                    pointPaint.setColor(Color.RED);
-                } else {
-                    pointPaint.setColor(Color.BLUE);
-                }
+                pointPaint.setColor(Color.RED);
+                pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
                 pointPaint.setColor(Color.BLUE);
+                pointPaint.setStrokeWidth(20);
+
             }
 
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
@@ -213,6 +205,7 @@ public class LineChartView extends View {
     //畫軸
     private void drawAxis(Canvas canvas) {
         int currentMaxX = defultMaxX;
+        int currentMaxY = defultMaxY;
         float[] baseLinePts = {
 //                verticalStartX, verticalStartY, verticalEndX, verticalEndY
                 orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
@@ -224,17 +217,19 @@ public class LineChartView extends View {
         if (scaleX <= 10) {
             currentMaxX = defultMaxX / (scaleX + 1);
         }
-        canvas.drawText(String.valueOf(currentMaxX), maxWidth + getPaddingLeft() + textPadding, maxHeight + getPaddingTop(), textPaint);
+        if (scaleY <= 10) {
+            currentMaxY = defultMaxY / (scaleY + 1);
+        }
+        canvas.drawText(String.valueOf(currentMaxX), maxWidth + getPaddingLeft() + textPadding, currentMaxY, textPaint);
     }
 
     //畫折線
     private void drawLine(Canvas canvas) {
-        canvas.drawPoint(defultMaxX + getPaddingLeft(), 300, pointPaint); //點 可刪
         for (int i = 0; i <= pointList.size() - 2; i++) {
             int startX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
             int stopX = pointList.get(i + 1).x * (scaleX + 1) + orginalX + getPaddingLeft();
-            int startY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
-            int stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1) + getPaddingTop();
+            int startY = orginalY - pointList.get(i).y * (scaleY + 1) + getPaddingTop();
+            int stopY = orginalY - pointList.get(i + 1).y * (scaleY + 1) + getPaddingTop();
 
             if (stopX > defultMaxX + getPaddingLeft()) {
                 stopX = 600 + getPaddingLeft();
@@ -250,12 +245,12 @@ public class LineChartView extends View {
             if (stopY < getPaddingTop()) {
                 stopY = getPaddingTop();
             } else {
-                stopY = orginalY - pointList.get(i + 1).y * (scaleX + 1) + getPaddingTop();
+                stopY = orginalY - pointList.get(i + 1).y * (scaleY + 1) + getPaddingTop();
             }
-//討論2
-//            if (startY <  getPaddingTop()) {
-//                return;
-//            }
+
+            if (startY < getPaddingTop()) {
+                return;
+            }
 
             canvas.drawLine(startX, startY, stopX, stopY, linePaint);
 
@@ -279,7 +274,6 @@ public class LineChartView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction() & MotionEvent.ACTION_MASK;
-        //Log.d("CV", "Action ["+action+"]");
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 //用迴圈取得點擊時第N個點
@@ -292,19 +286,47 @@ public class LineChartView extends View {
                     //當 highlightPoint = i 時，將point 變成紅色
                     if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
                         Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
-                        highlightPoint = i;
+                        // i == touch point index
+                        handleHighlightPoint(i);
+                        doAnimation();
                     }
+
                 }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-
                 break;
             }
-
         }
-
         invalidate();
         return true;
+    }
+
+    private void handleHighlightPoint(int touchPoint) {
+        if (highlightPoint == touchPoint) {
+            highlightPoint = -1;
+
+        } else {
+            highlightPoint = touchPoint;
+
+        }
+    }
+
+    private void doAnimation() {
+        ValueAnimator animator = ValueAnimator.ofInt(20, 30);
+        animator.setDuration(60);
+
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                highlightStrikeWidth = (int) animation.getAnimatedValue();
+//                Log.i("132", "highlightStrikeWidth : " + highlightStrikeWidth);
+                invalidate(); // onDraw
+            }
+        });
+
+        animator.setRepeatCount(1);
+        animator.setRepeatMode(ValueAnimator.REVERSE); //要先設setRepeatCount 才會有效果
+        animator.start();
     }
 }
