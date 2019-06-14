@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -38,10 +39,11 @@ public class LineChartView extends View {
     private int defultMaxY = 600;
     private int highlightPoint = -1; //-1 表示無用的值
     private int animatingPoint = -1;
-    int highlightStrikeWidth = 20;
-
+    int highlightStrikeWidth = 20 ;
+     GestureDetector detector = null;
     public LineChartView(Context context) {
         super(context);
+        initDetector();
         init();
     }
 
@@ -51,17 +53,21 @@ public class LineChartView extends View {
         ChartTextSize = typedArray.getDimensionPixelSize(R.styleable.MyView_chart_textSize, 14);
         lineColor = typedArray.getColor(R.styleable.MyView_lineColor, Color.BLUE);
 
+       // initDetector();
         typedArray.recycle();
         init();
+
     }
 
     public LineChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+      //  initDetector();
         init();
     }
 
     public LineChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+     //   initDetector();
         init();
     }
 
@@ -144,6 +150,68 @@ public class LineChartView extends View {
 
         invalidate(); //更新view
     }
+    public void initDetector(){
+       // detector = new GestureDetector(getContext(),new MyGestureListener()); //用自訂的監聽器
+        detector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                                    float distanceY) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                                   float velocityY) {
+                final float FLING_MIN_DISTANCE = 100;
+                final float FLING_MIN_VELOCITY = 150;
+                if (e1.getX() - e2.getX() > FLING_MIN_DISTANCE
+                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                    //X轴上的移动速度去绝对值进行比较
+                    //判断x轴坐标如果第一次按下时的坐标减去第二次离开屏幕时的坐标大于我们设置的位移，就说明此时是向左滑动的,坐标的原点位于该控件的左上角
+                    Toast.makeText(getContext(), "向左滑动", Toast.LENGTH_SHORT).show();
+                }
+                if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE
+                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                    //判断x轴坐标如果第二次离开屏幕时的坐标减去第一次按下时的坐标大于我们设置的位移，就说明此时是向右滑动的,坐标的原点位于该控件的左上角
+                    Toast.makeText(getContext(), "向右滑动", Toast.LENGTH_SHORT).show();
+                }
+                if (e2.getY() - e1.getY() > FLING_MIN_DISTANCE
+                        && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
+                    //判断Y轴坐标如果第二次离开屏幕时的坐标减去第一次按下时的坐标大于我们设置的位移，就说明此时是向下滑动的,坐标的原点位于该控件的左上角
+                    Toast.makeText(getContext(), "向下滑动", Toast.LENGTH_SHORT).show();
+                }
+                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE
+                        && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
+                    //判断Y轴坐标如果第一次按下屏幕时的坐标减去第二次离开屏幕时的坐标大于我们设置的位移，就说明此时是向上滑动的,坐标的原点位于该控件的左上角
+                    Toast.makeText(getContext(), "向上滑动", Toast.LENGTH_SHORT).show();
+                }
+                return true;//【注】返回ture，意思为该触摸事件被该回调函数消耗掉了，不会再返回给在我们拦截的方法中
+
+            }
+            @Override
+            public boolean onDown(MotionEvent e) {
+                Log.i("132", " onDown" );
+                return true;  //一定要設為true，因為第一個動作一定是點擊
+            }
+        });
+
+    }
 
     private void drawGrid(Canvas canvas) {
         //抓x軸的長度
@@ -192,19 +260,16 @@ public class LineChartView extends View {
                 continue;
             }
 
-            if (i == animatingPoint) {
-
+            if(i == animatingPoint) {
+                pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
-
+                pointPaint.setStrokeWidth(20);
             }
 
             if (i == highlightPoint) {
                 pointPaint.setColor(Color.RED);
-                pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
                 pointPaint.setColor(Color.BLUE);
-                pointPaint.setStrokeWidth(20);
-
             }
 
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
@@ -280,51 +345,56 @@ public class LineChartView extends View {
         return (int) (dpValue * density);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getAction() & MotionEvent.ACTION_MASK;
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                //用迴圈取得點擊時第N個點
-                for (int i = 0; i < pointList.size(); i++) {
-                    int pointX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
-                    int pointY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
-                    int range = 30; // 點擊的範圍
-                    //取得點擊的i
-                    //i = highlightPoint
-                    //當 highlightPoint = i 時，將point 變成紅色
-                    if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
-                        Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
-                        // i == touch point index
-                        handleHighlightPoint(i);
-                        doAnimation(i);
-                    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        int action = event.getAction() & MotionEvent.ACTION_MASK;
+//        switch (action) {
+//            case MotionEvent.ACTION_DOWN: {
+//                //用迴圈取得點擊時第N個點
+//                for (int i = 0; i < pointList.size(); i++) {
+//                    int pointX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
+//                    int pointY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
+//                    int range = 30; // 點擊的範圍
+//                    //取得點擊的i
+//                    //i = highlightPoint
+//                    //當 highlightPoint = i 時，將point 變成紅色
+//                    if (event.getX() > pointX - range && event.getX() < pointX + range && event.getY() > pointY - range && event.getY() < pointY + range) {
+//                        Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
+//                        // i == touch point index
+//                        handleHighlightPoint(i);
+//                        doAnimation(i);
+//                    }
+//                }
+//                break;
+//            }
+//            case MotionEvent.ACTION_UP: {
+//
+//            }
+//            case MotionEvent.ACTION_MOVE: {
+//                break;
+//            }
+//        }
+//        invalidate();
+//        return true;
+//    }
 
-                }
-                break;
-            }
-            case MotionEvent.ACTION_UP: {
 
-            }
-            case MotionEvent.ACTION_MOVE: {
-                break;
-            }
-        }
-        invalidate();
-        return true;
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        return detector.onTouchEvent(event);
+//    }
 
     private void handleHighlightPoint(int touchPoint) {
-        if (highlightPoint != touchPoint) {
+        if (highlightPoint == touchPoint) {
+            highlightPoint = -1;
+        } else {
             highlightPoint = touchPoint;
-
         }
     }
 
     private void doAnimation(final int point) {
         ValueAnimator animator = ValueAnimator.ofInt(20, 30);
         animator.setDuration(60);
-        final boolean aaa = highlightPoint == point;
 
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -338,15 +408,13 @@ public class LineChartView extends View {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                Log.i("132", "aaa : " + aaa);
-                if (!aaa) {
-                    highlightPoint = -1;
-                }
+                animatingPoint = point;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                // animatingPoint = -1;
+                //每次動畫跑完，animatingPoint 就改回初始值
+                animatingPoint = -1;
             }
         });
 
@@ -354,4 +422,5 @@ public class LineChartView extends View {
         animator.setRepeatMode(ValueAnimator.REVERSE); //要先設setRepeatCount 才會有效果
         animator.start();
     }
+
 }
