@@ -33,17 +33,19 @@ public class LineChartView extends View {
     private final int maxHeight = 550;
     private final int textPadding = 30;
     private int scaleX = 0; //縮放比例
+    private int perscaleX = 0; //縮放比例
     private int scaleY = 0; //縮放比例
     private ArrayList<Point> pointList = new ArrayList<Point>();
     private int defultMaxX = 600;
     private int defultMaxY = 600;
     private int highlightPoint = -1; //-1 表示無用的值
     private int animatingPoint = -1;
-    int highlightStrikeWidth = 20 ;
-     GestureDetector detector = null;
+    int highlightStrikeWidth = 20;
+    GestureDetector detector = null;
+    int lastscaleX = 0;
+
     public LineChartView(Context context) {
         super(context);
-        initDetector();
         init();
     }
 
@@ -53,7 +55,6 @@ public class LineChartView extends View {
         ChartTextSize = typedArray.getDimensionPixelSize(R.styleable.MyView_chart_textSize, 14);
         lineColor = typedArray.getColor(R.styleable.MyView_lineColor, Color.BLUE);
 
-       // initDetector();
         typedArray.recycle();
         init();
 
@@ -61,13 +62,11 @@ public class LineChartView extends View {
 
     public LineChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-      //  initDetector();
         init();
     }
 
     public LineChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-     //   initDetector();
         init();
     }
 
@@ -91,16 +90,16 @@ public class LineChartView extends View {
         int size = MeasureSpec.getSize(measureSpec);
 
         switch (mode) {
-            case MeasureSpec.UNSPECIFIED: {//如果没有指定大小，就设置为默认大小
+            case MeasureSpec.UNSPECIFIED: {  //如果没有指定大小，就设置为默认大小
                 mySize = defaultSize;
                 break;
             }
-            case MeasureSpec.AT_MOST: {//如果测量模式是最大取值为size
+            case MeasureSpec.AT_MOST: {  //如果测量模式是最大取值为size
                 //我们将大小取最大值,你也可以取其他值
                 mySize = defaultSize;
                 break;
             }
-            case MeasureSpec.EXACTLY: {//如果是固定的大小，那就不要去改变它
+            case MeasureSpec.EXACTLY: {  //如果是固定的大小，那就不要去改变它
                 mySize = size;
                 break;
             }
@@ -109,6 +108,7 @@ public class LineChartView extends View {
     }
 
     private void init() {
+        initDetector();
         textSize = ChartTextSize;
         textPaint.setTextSize(textSize);
         textPaint.setTextAlign(Paint.Align.CENTER);
@@ -122,11 +122,6 @@ public class LineChartView extends View {
         gridPaint.setColor(Color.GRAY);
         gridPaint.setStrokeWidth(3);
 
-//        pointList.add(new Point(5, 5));
-//        pointList.add(new Point(10, 70));
-//        pointList.add(new Point(20, 18));
-//        pointList.add(new Point(30, 30));
-
         pointList.add(new Point(50, 50));
         pointList.add(new Point(100, 190));
         pointList.add(new Point(200, 180));
@@ -134,8 +129,37 @@ public class LineChartView extends View {
     }
 
 
-    public void setScaleX(int scaleX) {
+    public void setMyScaleX(int scaleX) {
+        if (scaleX < 0) {
+            scaleX = Math.abs(scaleX); // scaleX 必須為正數
+        }
         this.scaleX = scaleX;
+        invalidate();
+    }
+
+    public void setScollScaleX(int scaleX) {
+        if (scaleX < 0) {
+            scaleX = Math.abs(scaleX); // scaleX 必須為正數
+        }
+
+        if (this.scaleX > 0) {
+            //第二次後要抓上一次的scaleX = scaleX - 變動值
+            Log.i("132", "setScollScaleX if lastscaleX : " + scaleX);
+            Log.i("132", "setScollScaleX if scaleX : " + scaleX);
+            if(  lastscaleX - scaleX < 0){
+                this.scaleX = 0;
+            }else{
+                this.scaleX = lastscaleX - scaleX;
+            }
+
+        } else {
+            //第一次走傳進來的scaleX 即可
+            this.scaleX = scaleX;
+            Log.i("132", "setScollScaleX else scaleX : " + scaleX);
+        }
+
+        lastscaleX = this.scaleX; // 記上一次的scaleX
+        Log.i("132", "setScollScaleX scaleX : " + scaleX);
         invalidate();
     }
 
@@ -150,29 +174,47 @@ public class LineChartView extends View {
 
         invalidate(); //更新view
     }
-    public void initDetector(){
-       // detector = new GestureDetector(getContext(),new MyGestureListener()); //用自訂的監聽器
-        detector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
 
+    private int startScrollX = -1;
+
+    public void initDetector() {
+        // detector = new GestureDetector(getContext(),new MyGestureListener()); //用自訂的監聽器
+        detector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                return false;
+                for (int i = 0; i < pointList.size(); i++) {
+                    int pointX = pointList.get(i).x * (scaleX + 1) + orginalX + getPaddingLeft();
+                    int pointY = orginalY - pointList.get(i).y * (scaleX + 1) + getPaddingTop();
+                    int range = 30; // 點擊的範圍
+                    //取得點擊的i
+                    //i = highlightPoint
+                    //當 highlightPoint = i 時，將point 變成紅色
+                    if (e.getX() > pointX - range && e.getX() < pointX + range && e.getY() > pointY - range && e.getY() < pointY + range) {
+                        Toast.makeText(getContext(), "點到了 - " + i + " point", Toast.LENGTH_SHORT).show();
+                        // i == touch point index
+                        handleHighlightPoint(i);
+                        doAnimation(i);
+                    }
+                }
+                return true;
             }
 
             @Override
             public void onShowPress(MotionEvent e) {
-
             }
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                                     float distanceY) {
-                return false;
+                perscaleX = (int) (e2.getX() - e1.getX()) / 100;
+//                Log.i("132", "onScroll distanceX : " + distanceX);
+                Log.i("132", "onScroll scale : " + perscaleX);
+                setScollScaleX(perscaleX);
+                return true;
             }
 
             @Override
             public void onLongPress(MotionEvent e) {
-
             }
 
             @Override
@@ -185,11 +227,18 @@ public class LineChartView extends View {
                     //X轴上的移动速度去绝对值进行比较
                     //判断x轴坐标如果第一次按下时的坐标减去第二次离开屏幕时的坐标大于我们设置的位移，就说明此时是向左滑动的,坐标的原点位于该控件的左上角
                     Toast.makeText(getContext(), "向左滑动", Toast.LENGTH_SHORT).show();
+                    int scale = (int) (e2.getX() - e1.getX()) / 100;
+//                    Log.i("132", "left scale : " + scale);
+
                 }
                 if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE
                         && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
                     //判断x轴坐标如果第二次离开屏幕时的坐标减去第一次按下时的坐标大于我们设置的位移，就说明此时是向右滑动的,坐标的原点位于该控件的左上角
                     Toast.makeText(getContext(), "向右滑动", Toast.LENGTH_SHORT).show();
+                    int scale = (int) (e2.getX() - e1.getX()) / 100;
+//                    Log.i("132", "right scale: " + scale);
+
+
                 }
                 if (e2.getY() - e1.getY() > FLING_MIN_DISTANCE
                         && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
@@ -202,11 +251,10 @@ public class LineChartView extends View {
                     Toast.makeText(getContext(), "向上滑动", Toast.LENGTH_SHORT).show();
                 }
                 return true;//【注】返回ture，意思为该触摸事件被该回调函数消耗掉了，不会再返回给在我们拦截的方法中
-
             }
+
             @Override
             public boolean onDown(MotionEvent e) {
-                Log.i("132", " onDown" );
                 return true;  //一定要設為true，因為第一個動作一定是點擊
             }
         });
@@ -259,19 +307,16 @@ public class LineChartView extends View {
             if (drawDotsY < getPaddingTop()) {
                 continue;
             }
-
-            if(i == animatingPoint) {
+            if (i == animatingPoint) {
                 pointPaint.setStrokeWidth(highlightStrikeWidth);
             } else {
                 pointPaint.setStrokeWidth(20);
             }
-
             if (i == highlightPoint) {
                 pointPaint.setColor(Color.RED);
             } else {
                 pointPaint.setColor(Color.BLUE);
             }
-
             canvas.drawPoint(drawDotsX, drawDotsY, pointPaint);
         }
     }
@@ -281,9 +326,7 @@ public class LineChartView extends View {
         int currentMaxX = defultMaxX;
         int currentMaxY = defultMaxY;
         float[] baseLinePts = {
-//                verticalStartX, verticalStartY, verticalEndX, verticalEndY
                 orginalX + getPaddingLeft(), getPaddingTop(), orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), //由上往畫
-//              horzontalStartX, horzontalStartY, horzontalEndX, horzontalEndY
                 orginalX + getPaddingLeft(), maxHeight + getPaddingTop(), maxWidth + getPaddingLeft(), maxHeight + getPaddingTop(), //
         };
         canvas.drawLines(baseLinePts, baselinePaint);
@@ -307,15 +350,12 @@ public class LineChartView extends View {
 
             if (stopX > defultMaxX + getPaddingLeft()) {
                 stopX = 600 + getPaddingLeft();
-//                Log.i("132", " if pointList.get(i) : " + pointList.get(i));
             } else {
                 stopX = pointList.get(i + 1).x * (scaleX + 1) + orginalX + getPaddingLeft();
-//                Log.i("132", "else pointList.get(i) : " + pointList.get(i));
             }
             if (startX > defultMaxX + getPaddingLeft()) {
                 return;
             }
-
             if (stopY < getPaddingTop()) {
                 stopY = getPaddingTop();
             } else {
@@ -325,9 +365,7 @@ public class LineChartView extends View {
             if (startY < getPaddingTop()) {
                 return;
             }
-
             canvas.drawLine(startX, startY, stopX, stopY, linePaint);
-
         }
     }
 
@@ -379,10 +417,10 @@ public class LineChartView extends View {
 //    }
 
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        return detector.onTouchEvent(event);
-//    }
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return detector.onTouchEvent(event);
+    }
 
     private void handleHighlightPoint(int touchPoint) {
         if (highlightPoint == touchPoint) {
@@ -395,12 +433,10 @@ public class LineChartView extends View {
     private void doAnimation(final int point) {
         ValueAnimator animator = ValueAnimator.ofInt(20, 30);
         animator.setDuration(60);
-
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 highlightStrikeWidth = (int) animation.getAnimatedValue();
-//                Log.i("132", "highlightStrikeWidth : " + highlightStrikeWidth);
                 invalidate(); // onDraw
             }
         });
