@@ -16,7 +16,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class LineChartView extends View {
     Paint linePaint = new Paint();
@@ -175,7 +179,7 @@ public class LineChartView extends View {
         invalidate(); //更新view
     }
 
-    private int startScrollX = -1;
+
 
     public void initDetector() {
         // detector = new GestureDetector(getContext(),new MyGestureListener()); //用自訂的監聽器
